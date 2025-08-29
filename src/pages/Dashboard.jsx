@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { logout, checkUserRole, getUserData } from "../services/AuthService";
+import { logout, getUserData } from "../services/AuthService";
 import { useAuth } from "../context/AuthContext";
 import { useRoleMiddleware } from "../middleware/roleMiddleware";
 import CourseList from "../components/CourseList";
+import MaterialList from "../components/MaterialList";
+import { ProgressService } from "../services/ProgressService";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [userRole, setUserRole] = useState(null);
+  const { user, userRole } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userProgress, setUserProgress] = useState([]);
 
   const { checkRoleAccess } = useRoleMiddleware(user?.uid, navigate);
 
@@ -18,10 +20,25 @@ const Dashboard = () => {
     const loadUserData = async () => {
       if (user) {
         try {
-          const role = await checkUserRole(user.uid);
+          console.log("Loading user data for UID:", user.uid);
+          console.log("User Role from Context:", userRole);
+
           const data = await getUserData(user.uid);
-          setUserRole(role);
+          const progress = await ProgressService.getUserProgress(user.uid);
+
+          console.log("User UID:", user.uid);
+          console.log("User Data:", data);
+          console.log("User Progress:", progress);
+
           setUserData(data);
+          setUserProgress(progress);
+
+          // Jika user adalah admin, redirect ke admin dashboard
+          if (userRole === "admin") {
+            console.log("User is admin, redirecting to admin dashboard");
+            navigate("/admin/dashboard", { replace: true });
+            return;
+          }
         } catch (error) {
           console.error("Error loading user data:", error);
         } finally {
@@ -30,8 +47,10 @@ const Dashboard = () => {
       }
     };
 
-    loadUserData();
-  }, [user]);
+    if (user && userRole) {
+      loadUserData();
+    }
+  }, [user, userRole, navigate]);
 
   const handleLogout = async () => {
     try {
@@ -71,116 +90,22 @@ const Dashboard = () => {
     <div className="p-8">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg mb-6">
-          <h1 className="text-3xl font-bold">User Dashboard</h1>
-          <p className="text-blue-100 mt-2">
-            Selamat datang di dashboard pengguna
-          </p>
-        </div>
-
-        {/* User Info Card */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Informasi User
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="font-medium">{user?.email}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Role</p>
-              <p className="font-medium capitalize">
-                <span
-                  className={`px-2 py-1 rounded-full text-xs ${
-                    userRole === "admin"
-                      ? "bg-purple-100 text-purple-800"
-                      : "bg-blue-100 text-blue-800"
-                  }`}
-                >
-                  {userRole || "Loading..."}
-                </span>
-              </p>
-            </div>
-            {userData && (
-              <>
-                <div>
-                  <p className="text-sm text-gray-500">Bergabung Sejak</p>
-                  <p className="font-medium">
-                    {userData.createdAt
-                      ?.toDate?.()
-                      ?.toLocaleDateString("id-ID") || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Login Terakhir</p>
-                  <p className="font-medium">
-                    {userData.lastLogin
-                      ?.toDate?.()
-                      ?.toLocaleDateString("id-ID") || "N/A"}
-                  </p>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Quick Actions
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            <button
-              onClick={checkAdminAccess}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              Test Admin Access
-            </button>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              View Profile
-            </button>
-            <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              Settings
-            </button>
-            {userRole === "admin" && (
-              <button
-                onClick={() => navigate("/admin/dashboard")}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Go to Admin Dashboard
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Role-based Content */}
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Content Berdasarkan Role
-          </h2>
-
-          {userRole === "admin" ? (
-            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-              <h3 className="font-semibold text-purple-800 mb-2">
-                Admin Content
+        
+        {/* Welcome Message */}
+        {userRole !== "admin" && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mb-6">
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                Selamat Datang di Platform Pembelajaran!
               </h3>
-              <p className="text-purple-700">
-                Anda memiliki akses penuh sebagai admin. Anda bisa mengakses
-                semua fitur dan mengelola user lain.
+              <p className="text-blue-700">
+                Mulai perjalanan belajar Anda dengan memilih course yang
+                tersedia di bawah ini. Setiap course berisi materi pembelajaran
+                yang dapat Anda pelajari sesuai kecepatan Anda.
               </p>
             </div>
-          ) : (
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <div className="font-semibold text-blue-800 mb-2">
-                User Content
-              </div>
-              <p className="text-blue-700 mb-4">
-                Anda adalah user biasa. Akses terbatas pada fitur-fitur dasar.
-              </p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Available Courses */}
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -188,16 +113,6 @@ const Dashboard = () => {
             Course yang Tersedia
           </h2>
           <CourseList isAdmin={false} />
-        </div>
-
-        {/* Logout Button */}
-        <div className="flex justify-end">
-          <button
-            onClick={handleLogout}
-            className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
-          >
-            Logout
-          </button>
         </div>
       </div>
     </div>

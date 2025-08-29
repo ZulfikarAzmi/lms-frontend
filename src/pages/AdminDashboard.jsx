@@ -1,10 +1,52 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import { logout } from "../services/AuthService";
+import { useNavigate } from "react-router-dom";
 import CourseList from "../components/CourseList";
+import MaterialList from "../components/MaterialList";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { user, userRole, loading: authLoading } = useAuth();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const validateAdminAccess = async () => {
+      if (user && userRole) {
+        try {
+          console.log("Validating admin access for user:", user.uid);
+          console.log("User role in AdminDashboard from context:", userRole);
+
+          if (userRole !== "admin") {
+            console.log("User is not admin, redirecting to user dashboard");
+            navigate("/dashboard", { replace: true });
+            return;
+          }
+          
+          setLoading(false);
+        } catch (error) {
+          console.error("Error validating admin access:", error);
+          navigate("/dashboard", { replace: true });
+        }
+      }
+    };
+
+    if (!authLoading) {
+      validateAdminAccess();
+    }
+  }, [user, userRole, authLoading, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  if (!user || userRole !== "admin") {
+    return null; // Will redirect
+  }
 
   const handleLogout = async () => {
     try {
@@ -59,8 +101,11 @@ const AdminDashboard = () => {
             <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
               Manage Users
             </button>
-            <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-              System Settings
+            <button
+              onClick={() => navigate("/admin/materials")}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Manage Materials
             </button>
             <button className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
               View Logs

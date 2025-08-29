@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { CourseService } from "../services/CourseService";
 import CourseForm from "./CourseForm";
 
 const CourseList = ({ isAdmin = false }) => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -100,19 +102,28 @@ const CourseList = ({ isAdmin = false }) => {
           {courses.map((course) => (
             <div
               key={course.id}
-              className="bg-white rounded-lg shadow-md overflow-hidden"
+              className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+              onClick={() => !isAdmin && navigate(`/courses/${course.id}`)}
             >
               <div className="h-48 bg-gray-200">
                 {course.imageUrl ? (
                   <img
-                    src={course.imageUrl} // Base64 string akan langsung bisa ditampilkan
+                    src={course.imageUrl} 
                     alt={course.title}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                    <svg
+                      className="w-16 h-16"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </div>
                 )}
@@ -126,13 +137,19 @@ const CourseList = ({ isAdmin = false }) => {
                   {isAdmin && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleEditCourse(course)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditCourse(course);
+                        }}
                         className="text-blue-600 hover:text-blue-800 text-sm"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteCourse(course.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteCourse(course.id);
+                        }}
                         className="text-red-600 hover:text-red-800 text-sm"
                       >
                         Hapus
@@ -151,10 +168,23 @@ const CourseList = ({ isAdmin = false }) => {
                   </p>
                 )}
 
-                <div className="text-xs text-gray-500">
-                  Dibuat:{" "}
-                  {course.createdAt?.toDate?.()?.toLocaleDateString("id-ID") ||
-                    "N/A"}
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-xs text-gray-500">
+                    Dibuat:{" "}
+                    {course.createdAt?.toDate?.()?.toLocaleDateString("id-ID") ||
+                      "N/A"}
+                  </div>
+                  {isAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/admin/dashboard/${course.id}/materials`);
+                      }}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm transition-colors"
+                    >
+                      Kelola Materi
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
