@@ -9,6 +9,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import CourseManagement from "./pages/CourseManagement";
 import MaterialForm from "./components/MaterialForm";
+import QuizManagement from "./pages/QuizManagement";
+import TakeQuiz from "./pages/TakeQuiz";
 
 function App() {
   return (
@@ -16,6 +18,7 @@ function App() {
       <Navbar />
 
       <Routes>
+        {/* Auth */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -39,7 +42,27 @@ function App() {
           }
         />
 
-        {/* Material Management nested di bawah dashboard */}
+        {/* Course Detail untuk user */}
+        <Route
+          path="/courses/:id"
+          element={
+            <ProtectedRoute>
+              <CourseDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Take Quiz untuk user */}
+        <Route
+          path="/course/:courseId/quiz/:quizId"
+          element={
+            <ProtectedRoute>
+              <TakeQuiz />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Material Management */}
         <Route
           path="/admin/dashboard/:courseId/materials"
           element={
@@ -49,12 +72,12 @@ function App() {
           }
         />
 
-        {/* Course Detail untuk user */}
+        {/* Quiz Management */}
         <Route
-          path="/courses/:id"
+          path="/admin/dashboard/:courseId/quizzes"
           element={
-            <ProtectedRoute>
-              <CourseDetail />
+            <ProtectedRoute adminOnly={true}>
+              <QuizManagement />
             </ProtectedRoute>
           }
         />

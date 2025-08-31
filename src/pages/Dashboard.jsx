@@ -96,12 +96,10 @@ const Dashboard = () => {
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200 mb-6">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                Selamat Datang di Platform Pembelajaran!
+                Selamat Datang di ZulfiCourse!
               </h3>
               <p className="text-blue-700">
-                Mulai perjalanan belajar Anda dengan memilih course yang
-                tersedia di bawah ini. Setiap course berisi materi pembelajaran
-                yang dapat Anda pelajari sesuai kecepatan Anda.
+                Silahkan pilih course yang ingin anda pelajari.
               </p>
             </div>
           </div>

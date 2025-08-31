@@ -108,7 +108,7 @@ const CourseList = ({ isAdmin = false }) => {
               <div className="h-48 bg-gray-200">
                 {course.imageUrl ? (
                   <img
-                    src={course.imageUrl} 
+                    src={course.imageUrl}
                     alt={course.title}
                     className="w-full h-full object-cover"
                   />
@@ -171,19 +171,31 @@ const CourseList = ({ isAdmin = false }) => {
                 <div className="flex items-center justify-between mt-4">
                   <div className="text-xs text-gray-500">
                     Dibuat:{" "}
-                    {course.createdAt?.toDate?.()?.toLocaleDateString("id-ID") ||
-                      "N/A"}
+                    {course.createdAt
+                      ?.toDate?.()
+                      ?.toLocaleDateString("id-ID") || "N/A"}
                   </div>
                   {isAdmin && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/admin/dashboard/${course.id}/materials`);
-                      }}
-                      className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm transition-colors"
-                    >
-                      Kelola Materi
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/admin/dashboard/${course.id}/materials`);
+                        }}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm transition-colors"
+                      >
+                        Kelola Materi
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/admin/dashboard/${course.id}/quizzes`);
+                        }}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm transition-colors"
+                      >
+                        Kelola Quiz
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
